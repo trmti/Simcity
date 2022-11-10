@@ -1,21 +1,8 @@
 import kaboom from 'https://unpkg.com/kaboom/dist/kaboom.mjs';
+import stage from './road.json' assert { 'type': 'json' };
+import persons from './persons.json' assert { 'type': 'json' };
 
-const stage = [
-  [2, 2, 0],
-  [0, 0, 0],
-  [1, 0, 1],
-];
-
-const persons = [
-  {
-    pos: [2, 0],
-    to: [2, 1],
-  },
-  {
-    pos: [0, 1],
-    to: [2, 1],
-  },
-];
+const baseURL = 'http://localhost:8080';
 const moves = [0, 1];
 
 kaboom({
@@ -76,7 +63,11 @@ scene('game', ({ stage, persons }) => {
   });
 });
 
-function start() {
+async function start() {
+  await fetch(`${baseURL}/createMap`, {
+    method: 'POST',
+    body: JSON.stringify(stage),
+  });
   go('game', {
     stage,
     persons,
