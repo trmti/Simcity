@@ -3,12 +3,14 @@
 #include <deque>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
+//#include <jsoncpp/json/json.h>
 
 using namespace boost;
 
 typedef adjacency_list<listS, vecS, undirectedS, no_property, property<edge_weight_t, int>> Graph;
 typedef std::pair<int, int> Edge;
 typedef graph_traits<Graph>::vertex_descriptor Vertex;
+
 
 //駅の定義
 enum {
