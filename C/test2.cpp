@@ -1,8 +1,4 @@
 #include <iostream>
-#include <cstdlib>
-#include <exception>
-#include <fstream>
-#include <string>
 using namespace std;
 
 #include <jsoncpp/json/json.h>
@@ -17,5 +13,6 @@ int main()
     Json::Reader reader;
     Json::Value value;
     reader.parse(body, value);
-    cout << value[0]["home"][0] << endl;
+
+    cout << value[0]["home"] << endl;
 }
