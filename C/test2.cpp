@@ -1,4 +1,5 @@
 #include <iostream>
+#include <typeinfo>
 using namespace std;
 
 #include <jsoncpp/json/json.h>
@@ -14,5 +15,5 @@ int main()
     Json::Value value;
     reader.parse(body, value);
 
-    cout << value[0]["home"] << endl;
+    cout << typeid(value[0]["home"].asInt()).name() << endl;
 }
