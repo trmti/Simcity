@@ -5,9 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link rel="stylesheet" href="style/index.css" />
   </head>
   <body>
-    <script src="https://kaboomjs.com/lib/0.5.1/kaboom.js"></script>
-    <script src="./main.js" type="module"></script>
+    <div class="button" onClick="onClick()">
+      <p class="btnText">Start Game?</p>
+      <div class="btnTwo">
+        <p class="btnText2">GO!</p>
+      </div>
+    </div>
   </body>
+  <script>
+    function onClick() {
+      window.location.href = '/game.html';
+    }
+  </script>
 </html>
