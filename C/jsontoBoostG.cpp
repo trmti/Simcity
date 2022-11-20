@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 using namespace std;
 
 #include <boost/graph/adjacency_list.hpp>
@@ -9,41 +10,48 @@ using namespace std;
 #include <jsoncpp/json/reader.h>
 #include "./jsontostr.hpp"
 
+#define JSONWIDTH 5
+#define JSONHEIGHT 5
+
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Graph;
 typedef std::map<int, Graph::vertex_descriptor> Vertex_list;
 
-int* json_to_array(Json::Value json, int height, int width)
+void json_to_array(Json::Value json, int array[JSONHEIGHT][JSONWIDTH])
 {
-    int array[height][width] = {{0},};
-    for(int i = 0; i < height; ++i)
+    for(int i = 0; i < JSONHEIGHT; ++i)
     {
-        for(int j = 0; j < height; ++j)
+        for(int j = 0; j < JSONWIDTH; ++j)
         {
             array[i][j] = static_cast<int>(json[i][j].asInt());
         }
     }
 }
 
-void conv_json_to_boost_g(Graph& G, Json::Value jsonmap, int height, int width, Vertex_list& V)
+//
+void conv_json_to_boost_g(Graph& G, int array[JSONHEIGHT][JSONWIDTH], Vertex_list& V)
 {
-    for(int i = 0; i < (height * width); ++i)
+    for(int i = 0; i < (JSONHEIGHT * JSONWIDTH); ++i)
     {
         V[i] = add_vertex(G);
     }
     
-    for(int i = 0; i < height; ++i)
+    for(int i = 0; i < JSONHEIGHT; ++i)
     {
-        for(int j = 0; j < width; ++j)
+        for(int j = 0; j < JSONWIDTH; ++j)
         {
-            if(jsonmap[i][j] == 0) //読み込んだグリッドが道路だった場合
+            if(array[i][j] < 100)
             {
-                if(i != 0)
+                switch (array[i][j])
                 {
-                    add_edge(jsonmap[i][j].asInt(), jsonmap[i-1][j].asInt(), G);
-                }
-                if(j != 0)
-                {
-                    add_edge(jsonmap[i][j], jsonmap[i][j-1], G);
+                    case 0:
+                        if(j != 0){ add_edge(V[i*JSONWIDTH + (j-1)], V[i*JSONWIDTH + j], G); }
+                        break;
+                    case 1:
+                        if(i != 0){ add_edge(V[(i-1)*JSONWIDTH + j], V[i*JSONWIDTH + j], G); }
+                        break;
+                    case 2:
+                        add_edge(V[i][j-1], V[i][j], G);
+                        add_edge(V[i-1][j], V[i][j], G);
                 }
             }
         }
@@ -55,6 +63,23 @@ int main()
 {
     Graph G;
     Vertex_list V;
+    char path[] = "./json/road.json";
+    int array[JSONHEIGHT][JSONWIDTH];
+    
+    string body = conv_json_to_str(path);
+    Json::Reader reader;
+    Json::Value map;
+    reader.parse(body, map);
+
+    json_to_array(map, array);
+
+    for(int i = 0; i < JSONHEIGHT; ++i)
+    {
+        for(int j = 0; j < JSONWIDTH; ++j)
+        {
+            cout << array[i][j] << endl;
+        }
+    }
 
     //conv_json_to_boost_g(G, 5, 5, V);
 
