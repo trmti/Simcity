@@ -41,7 +41,6 @@ scene('game', ({ stage, persons }) => {
   onKeyPress('space', () => {
     const personObjs = get('person');
     moves.forEach((move, index) => {
-      console.log(move);
       let direction;
       switch (move) {
         case 0:
@@ -57,17 +56,19 @@ scene('game', ({ stage, persons }) => {
           direction = [-3000, 0];
           break;
       }
-      console.log(direction);
       personObjs[index].move(direction[0], direction[1]);
     });
   });
 });
 
 async function start() {
-  await fetch(`${baseURL}/createMap`, {
-    method: 'POST',
-    body: JSON.stringify(stage),
-  });
+  console.log(
+    await fetch(`${baseURL}/createMap`, {
+      method: 'POST',
+      body: JSON.stringify(stage),
+      mode: 'no-cors',
+    })
+  );
   go('game', {
     stage,
     persons,
