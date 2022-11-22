@@ -16,7 +16,7 @@ using namespace std;
 #define HEIGHT 5
 #define WIDTH 5
 
-struct EdgeWeight 
+struct EdgeWeight
 {
     int weight;
 };

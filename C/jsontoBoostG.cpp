@@ -1,87 +1,104 @@
+#include "jsontoBoostG.hpp"
+
 #include <iostream>
 #include <vector>
+#include <map>
+#include <string>
 using namespace std;
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <boost/graph/connected_components.hpp>
 
 #include <jsoncpp/json/json.h>
 #include <jsoncpp/json/writer.h>
 #include <jsoncpp/json/reader.h>
 #include "./jsontostr.hpp"
 
-#define JSONWIDTH 5
-#define JSONHEIGHT 5
+#define HEIGHT 5
+#define WIDTH 5
 
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Graph;
-typedef std::map<int, Graph::vertex_descriptor> Vertex_list;
-
-void json_to_array(Json::Value json, int array[JSONHEIGHT][JSONWIDTH])
+struct VertexName
 {
-    for(int i = 0; i < JSONHEIGHT; ++i)
+    string name;
+};
+
+struct EdgeWeight
+{
+    int weight;
+};
+
+typedef boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS, VertexName, EdgeWeight> Graph; //グラフ
+typedef map<int, map<int, Graph::vertex_descriptor>> Vertex_list2d; //2次元のグラフの頂点リスト
+
+void conv_json_to_array(Json::Value json, vector<vector<int>>& array, int height, int width)
+{
+    for(int i = 0; i < height; ++i)
     {
-        for(int j = 0; j < JSONWIDTH; ++j)
+        for(int j = 0; j < width; ++j)
         {
             array[i][j] = static_cast<int>(json[i][j].asInt());
         }
     }
 }
 
-//
-void conv_json_to_boost_g(Graph& G, int array[JSONHEIGHT][JSONWIDTH], Vertex_list& V)
-{
-    for(int i = 0; i < (JSONHEIGHT * JSONWIDTH); ++i)
+void make_vertex_list(Graph& G, Vertex_list2d& V, int height, int width)
+{   
+    for(int i = 0; i < height; ++i)
     {
-        V[i] = add_vertex(G);
-    }
-    
-    for(int i = 0; i < JSONHEIGHT; ++i)
-    {
-        for(int j = 0; j < JSONWIDTH; ++j)
+        for(int j = 0; j < width; ++j)
         {
-            if(array[i][j] < 100)
+            V[i][j] = add_vertex(G);
+            G[V[i][j]].name = to_string(i) + ", " + to_string(j);
+        }
+    }
+}
+
+void conv_json_to_boost_g(Graph& G, vector<vector<int>>& grid, Vertex_list2d& V, int height, int width)
+{
+    Graph::edge_descriptor e;
+    bool inserted = false;
+    for(int i = 0; i < height; ++i)
+    {
+        for(int j = 0; j < width; ++j)
+        {
+            if(grid[i][j] < 100)
             {
-                switch (array[i][j])
+                if(i != 0 && grid[i-1][j] < 100)
                 {
-                    case 0:
-                        if(j != 0){ add_edge(V[i*JSONWIDTH + (j-1)], V[i*JSONWIDTH + j], G); }
-                        break;
-                    case 1:
-                        if(i != 0){ add_edge(V[(i-1)*JSONWIDTH + j], V[i*JSONWIDTH + j], G); }
-                        break;
-                    case 2:
-                        add_edge(V[i][j-1], V[i][j], G);
-                        add_edge(V[i-1][j], V[i][j], G);
+                    boost::tie(e, inserted) = add_edge(V[i][j], V[i-1][j], G);
+                    G[e].weight = 1;
+                }
+                if(j != 0 && grid[i][j-1] < 100)
+                {
+                    boost::tie(e, inserted) = add_edge(V[i][j], V[i][j-1], G);
+                    G[e].weight = 1;
+                }
+            }
+            else
+            {
+                if(i != 0 && grid[i-1][j] < 100)
+                {
+                    boost::tie(e, inserted) = add_edge(V[i][j], V[i-1][j], G);
+                    G[e].weight = 1000;
+                }
+                else if(j != 0 && grid[i][j-1] < 100)
+                {
+                    boost::tie(e, inserted) = add_edge(V[i][j], V[i][j-1], G);
+                    G[e].weight = 1000;
+                }
+                else if(i < (height-1) && grid[i+1][j] < 100)
+                {
+                    boost::tie(e, inserted) = add_edge(V[i][j], V[i+1][j], G);
+                    G[e].weight = 1000;
+                }
+                else if(j < (width-1) && grid[i][j+1] < 100)
+                {
+                    boost::tie(e, inserted) = add_edge(V[i][j], V[i][j+1], G);
+                    G[e].weight = 1000;
                 }
             }
         }
     }
     
-}
-
-int main()
-{
-    Graph G;
-    Vertex_list V;
-    char path[] = "./json/road.json";
-    int array[JSONHEIGHT][JSONWIDTH];
-    
-    string body = conv_json_to_str(path);
-    Json::Reader reader;
-    Json::Value map;
-    reader.parse(body, map);
-
-    json_to_array(map, array);
-
-    for(int i = 0; i < JSONHEIGHT; ++i)
-    {
-        for(int j = 0; j < JSONWIDTH; ++j)
-        {
-            cout << array[i][j] << endl;
-        }
-    }
-
-    //conv_json_to_boost_g(G, 5, 5, V);
-
-    //cout << num_vertices(G) << endl;
 }
