@@ -14,8 +14,8 @@ using namespace std;
 #include <jsoncpp/json/writer.h>
 #include <jsoncpp/json/reader.h>
 
-#include "./jsontostr.hpp"
-#include "./jsontoBoostG.hpp"
+#include "jsontostr.hpp"
+#include "jsontoBoostG.hpp"
 
 #define HEIGHT 5
 #define WIDTH 5

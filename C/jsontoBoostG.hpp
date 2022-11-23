@@ -1,3 +1,6 @@
+#ifndef JSONTOBOOSTG_HPP
+#define JSONTOBOOSTG_HPP
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -24,3 +27,5 @@ void conv_json_to_array(Json::Value json, vector<vector<int>>& array, int height
 void make_vertex_list(Graph& G, Vertex_list2d& V, int height, int width);
 
 void conv_json_to_boost_g(Graph& G, vector<vector<int>>& grid, Vertex_list2d& V, int height, int width);
+
+#endif 
