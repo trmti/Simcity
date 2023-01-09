@@ -7,141 +7,98 @@ import persons from './persons.json' assert { 'type': 'json' };
 const baseURL = 'http://localhost:8080';
 const moves = [0, 1];
 
+const xSize = 20;
+const ySize = 20;
+
 kaboom({
   background: [255, 255, 255],
+  width: xSize * 50 + 100,
+  height: ySize * 50 + 100,
 });
 
 // building size is 50 x 50
-loadSprite('home', '/images/buildings/house_red.png');
+loadSprite('home1', '/images/buildings/house_red.png');
+loadSprite('home2', '/images/buildings/house_blue.png');
+loadSprite('home3', '/images/buildings/building.png');
+
 loadSprite('person', '/images/peaple.png');
 
-loadSprite('load0', '/images/roads/douro0.png');
-loadSprite('load1', '/images/roads/douro1.png');
-loadSprite('load2', '/images/roads/douro2.png');
-loadSprite('load3', '/images/roads/douro3.png');
-loadSprite('load4', '/images/roads/douro4.png');
-loadSprite('load5', '/images/roads/douro5.png');
-loadSprite('load6', '/images/roads/douro6.png');
-loadSprite('load7', '/images/roads/douro7.png');
-loadSprite('load8', '/images/roads/douro8.png');
-loadSprite('load9', '/images/roads/douro9.png');
-loadSprite('load10', '/images/roads/douro10.png');
+loadSprite('road0', '/images/roads/douro0.png');
+loadSprite('road1', '/images/roads/douro1.png');
+loadSprite('road2', '/images/roads/douro2.png');
+loadSprite('road3', '/images/roads/douro3.png');
+loadSprite('road4', '/images/roads/douro4.png');
+loadSprite('road5', '/images/roads/douro5.png');
+loadSprite('road6', '/images/roads/douro6.png');
+loadSprite('road7', '/images/roads/douro7.png');
+loadSprite('road8', '/images/roads/douro8.png');
+loadSprite('road9', '/images/roads/douro9.png');
+loadSprite('road10', '/images/roads/douro10.png');
+
+function addObj(src, index) {
+  return [
+    sprite(src),
+    pos(index[0] * 50 + 50, index[1] * 50 + 50),
+    area(),
+    body(),
+    cleanup(),
+  ];
+}
 
 scene('game', ({ stage, persons }) => {
   gravity(0);
+  // window.addEventListener('scroll', (event) => {
+  //   console.log('scroll', window.scrollX, window.scrollY);
+  //   camPos(window.scrollX, window.scrollY);
+  // });
 
   stage.map((y, yIndex) => {
     y.map((x, xIndex) => {
+      const pos = [xIndex, yIndex];
       switch (x) {
         case -1:
           break;
         case 0:
-          add([
-            sprite('load0'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road0', pos));
           break;
         case 1:
-          add([
-            sprite('load1'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road1', pos));
           break;
         case 2:
-          add([
-            sprite('load2'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road2', pos));
           break;
         case 3:
-          add([
-            sprite('load3'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road3', pos));
           break;
         case 4:
-          add([
-            sprite('load4'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road4', pos));
           break;
         case 5:
-          add([
-            sprite('load5'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road5', pos));
           break;
         case 6:
-          add([
-            sprite('load6'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road6', pos));
           break;
         case 7:
-          add([
-            sprite('load7'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road7', pos));
           break;
         case 8:
-          add([
-            sprite('load8'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road8', pos));
           break;
         case 9:
-          add([
-            sprite('load9'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road9', pos));
           break;
         case 10:
-          add([
-            sprite('load10'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('road10', pos));
           break;
         case 100:
-          add([
-            sprite('home'),
-            pos(xIndex * 50 + 50, yIndex * 50 + 50),
-            area(),
-            body(),
-            cleanup(),
-          ]);
+          add(addObj('home1', pos));
+          break;
+        case 101:
+          add(addObj('home2', pos));
+          break;
+        case 102:
+          add(addObj('home3', pos));
           break;
       }
     });
@@ -181,8 +138,8 @@ scene('game', ({ stage, persons }) => {
 });
 
 async function start() {
-  const stage = createMap(10, 10);
-  console.log(stage);
+  const stage = createMap(xSize, ySize);
+
   go('game', {
     stage,
     persons,

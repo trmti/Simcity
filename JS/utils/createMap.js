@@ -1,5 +1,5 @@
 const roads = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const homes = [100];
+const homes = [100, 101, 102];
 const roadDirections = {
   cross: [0, 1, 2, 3],
   T: { 0: [0, 1, 3], 1: [0, 1, 2], 2: [1, 2, 3], 3: [0, 2, 3] },
@@ -57,7 +57,6 @@ function formMap(map) {
       const left = xIndex !== 0 ? map[yIndex][xIndex - 1] : undefined;
 
       if (!roads.includes(object)) return;
-
       // cross
       if (
         roads.includes(top) &&
@@ -128,39 +127,60 @@ export function createMap(xSize, ySize) {
   let map = Array.from(Array(xSize)).map(() =>
     Array.from(Array(ySize)).map(() => -1)
   );
-  for (let i = 0; i < Math.ceil(map.length / 10); i++) {
+
+  const count = Math.floor((xSize * ySize) / 2);
+
+  for (let i = 0; i < count; i++) {
     const point = [
       Math.floor(Math.random() * xSize),
       Math.floor(Math.random() * ySize),
     ];
-    roadDirections.cross.forEach((type) => {
-      map = spreadRoad(map, point, type);
-    });
+    const roadType = Math.floor(Math.random() * 10) + 1;
+
+    const top = point[1] !== 0 ? map[point[1] - 1][point[0]] : undefined;
+    const right =
+      point[0] !== map[point[1]].length - 1
+        ? map[point[1]][point[0] + 1]
+        : undefined;
+    const bottom =
+      point[1] !== map.length - 1 ? map[point[1] + 1][point[0]] : undefined;
+    const left = point[0] !== 0 ? map[point[1]][point[0] - 1] : undefined;
+
+    if (top === -1 && right === -1 && bottom === -1 && left === -1) {
+      // L字
+      if (roadType < 6) {
+        const directionType = Math.floor(Math.random() * 4);
+
+        roadDirections.L[directionType].forEach((direction) => {
+          map = spreadRoad(map, point, direction);
+        });
+      }
+      // T字
+      else if (roadType < 9) {
+        const directionType = Math.floor(Math.random() * 4);
+
+        roadDirections.T[directionType].forEach((direction) => {
+          map = spreadRoad(map, point, direction);
+        });
+      }
+      // cross
+      else {
+        roadDirections.cross.forEach((type) => {
+          map = spreadRoad(map, point, type);
+        });
+      }
+    }
   }
 
-  for (let j = 0; j < Math.ceil(map.length / 5); j++) {
-    const point = [
-      Math.floor(Math.random() * xSize),
-      Math.floor(Math.random() * ySize),
-    ];
-    const type = Math.floor(Math.random() * 4);
-
-    roadDirections.T[type].forEach((direction) => {
-      map = spreadRoad(map, point, direction);
+  // home
+  map.forEach((line, yIndex) => {
+    line.forEach((object, xIndex) => {
+      if (object === -1) {
+        map[yIndex][xIndex] = homes[Math.floor(Math.random() * homes.length)];
+      }
     });
-  }
-
-  for (let k = 0; k < Math.ceil(map.length / 5); k++) {
-    const point = [
-      Math.floor(Math.random() * xSize),
-      Math.floor(Math.random() * ySize),
-    ];
-    const type = Math.floor(Math.random() * 4);
-
-    roadDirections.L[type].forEach((direction) => {
-      map = spreadRoad(map, point, direction);
-    });
-  }
+  });
 
   return formMap(map);
+  // return map;
 }
