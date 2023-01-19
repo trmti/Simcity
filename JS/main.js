@@ -5,15 +5,9 @@ import { makeGraph } from '../server/Daikusutora/dijkstra.mjs';
 import { newGoal } from '../server/utils/desideNextGoal.js';
 const baseURL = 'http://localhost:8080';
 
-<<<<<<< HEAD
 const xSize = 10;
 const ySize = 10;
 const PERSONS = 1;
-=======
-const xSize = 20;
-const ySize = 20;
-const PERSONS = 10;
->>>>>>> 004ffc12fcebfa69e9719f86060b77b2ce923944
 var stage, g, persons;
 var idMap = {};
 var finished = true;
