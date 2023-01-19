@@ -42,7 +42,6 @@ Graph.prototype.connect_node = function (
   nameB,
   cost //頂点どうしを接続
 ) {
-  console.log(nameA, nameB);
   this.nodes[nameA].connect(nameB, cost);
   this.nodes[nameB].connect(nameA, cost);
 };
@@ -65,7 +64,6 @@ Graph.prototype.dijkstra_shortest_path = function (nameS, nameG) {
     let { data: n_name, priority: my_d } = p.dequeue(); //優先度付きキューから距離が最小の頂点を得る
     if (n_name == nameG) {
       //ゴールの距離が確定した時点で終了
-      console.log(cnt);
       break;
     }
     if (cnt > this.num()) {
@@ -111,7 +109,6 @@ Graph.prototype.hide_node_dijkstra = function (nameS, nameG) {
       break;
     }
   }
-  console.log(rm_node_name + 'is hided.');
   let remove_node = this.nodes[rm_node_name];
   let original_adjacent = [];
   for (let i = 0; i < remove_node.adjacent.length; i++) {
@@ -125,5 +122,5 @@ Graph.prototype.hide_node_dijkstra = function (nameS, nameG) {
   for (let i = 0; i < original_adjacent.length; i++) {
     remove_node.adjacent[i] = original_adjacent[i].concat();
   }
-  return result;
+  return { result, avoid: str_to_pos(rm_node_name) };
 };

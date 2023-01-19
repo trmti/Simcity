@@ -46,15 +46,17 @@ function desideNextGoal(map) {
 
 export function newGoal(map, from) {
   let finished = false;
-  let to, route;
+  let to, route, avoid;
   while (!finished) {
     console.log('new');
     to = desideNextGoal(map);
     try {
-      route = g.dijkstra_shortest_path(
+      const res = g.hide_node_dijkstra(
         pos_to_str(from[0], from[1]),
         pos_to_str(to[1], to[0])
       );
+      route = res.result;
+      avoid = res.avoid;
     } catch {
       route = false;
     }

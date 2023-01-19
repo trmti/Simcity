@@ -8,7 +8,7 @@ const baseURL = 'http://localhost:8080';
 const xSize = 10;
 const ySize = 10;
 const PERSONS = 1;
-var stage, g, persons;
+var stage, g, persons, realRoute;
 var idMap = {};
 var finished = true;
 
@@ -18,11 +18,14 @@ kaboom({
   height: ySize * 50 + 100,
 });
 
+loadSprite('hilight', '/images/flame.png');
+loadSprite('hilight_red', '/images/flame_red.png');
+loadSprite('avoid', '/images/kuro.png');
+
 // building size is 50 x 50
 loadSprite('home1', '/images/buildings/house_red.png');
 loadSprite('home2', '/images/buildings/house_blue.png');
 loadSprite('home3', '/images/buildings/building.png');
-loadSprite('hilight', '/images/flame.png');
 
 loadSprite('person', '/images/peaple.png');
 
@@ -54,8 +57,6 @@ scene('game', ({ stage, persons }) => {
   const home = document.getElementById('home');
   const goTo = document.getElementById('goTo');
   const route = document.getElementById('route');
-  const layer = document.getElementById('fadeLayer');
-  const icon = document.getElementById('loadingIcon');
 
   let currentId = 0;
 
@@ -141,17 +142,42 @@ scene('game', ({ stage, persons }) => {
       Object.keys(persons).map(async (index) => {
         const res = persons[index].route.shift();
         if (persons[index].route.length === 0) {
-          layer.style.visibility = 'visible';
-          icon.style.visibility = 'visible';
-          const route = await (
+          const res_avoid = await (
             await fetch(`${baseURL}/newGoal`, {
               method: 'POST',
               body: JSON.stringify(res),
             })
           ).json();
+          const route = res_avoid.route;
+          const avoid = res_avoid.avoid;
+          persons[index].home = res;
+          persons[index].to = route[route.length - 1];
+          console.log('route:', route);
+          console.log('to:', persons);
 
-          console.log(index, currentId);
           if (index == currentId) {
+            realRoute = await (
+              await fetch(`${baseURL}/dijkstra`, {
+                method: 'POST',
+                body: JSON.stringify({
+                  from: res,
+                  to: persons[index].to,
+                }),
+              })
+            ).json();
+            console.log('realRoute:', realRoute);
+
+            destroyAll('hilight_red');
+            realRoute.forEach((road) => {
+              add([
+                sprite('hilight_red'),
+                pos(road[1] * 50 + 50, road[0] * 50 + 50),
+                area(),
+                cleanup(),
+                'hilight_red',
+              ]);
+            });
+
             destroyAll('hilight');
             route.forEach((road) => {
               add([
@@ -162,10 +188,18 @@ scene('game', ({ stage, persons }) => {
                 'hilight',
               ]);
             });
+
+            destroyAll('avoid');
+            add([
+              sprite('avoid'),
+              pos(avoid[1] * 50 + 50, avoid[0] * 50 + 50),
+              area(),
+              cleanup(),
+              'avoid',
+            ]);
           }
+          persons[index].avoid = avoid;
           persons[index].route = route;
-          layer.style.visibility = 'hidden';
-          icon.style.visibility = 'hidden';
         }
 
         return res;
@@ -211,7 +245,7 @@ scene('game', ({ stage, persons }) => {
       btn.textContent = 'Stop';
       intervalId = setInterval(async () => {
         await next();
-      }, 500);
+      }, 200);
     } else {
       btn.textContent = 'Start Auto Mode';
       clearInterval(intervalId);

@@ -25,13 +25,35 @@ server({ port: 8080, security: { csrf: false } }, corsOption, [
   post('/newGoal', (ctx) => {
     const from = JSON.parse(ctx.data);
     let finished = false;
-    let to, route;
+    let to, route, res, avoid;
     while (!finished) {
       to = desideNextGoal(map);
       try {
-        route = g.dijkstra_shortest_path(
+        res = g.hide_node_dijkstra(
           pos_to_str(from[0], from[1]),
           pos_to_str(to[1], to[0])
+        );
+        route = res.result;
+        avoid = res.avoid;
+      } catch {
+        res = false;
+      }
+      if (res) {
+        finished = true;
+      }
+    }
+    return status(200).send(JSON.stringify({ route, avoid }));
+  }),
+
+  post('/dijkstra', (ctx) => {
+    const { from, to } = JSON.parse(ctx.data);
+    let finished = false;
+    let route;
+    while (!finished) {
+      try {
+        route = g.dijkstra_shortest_path(
+          pos_to_str(from[0], from[1]),
+          pos_to_str(to[0], to[1])
         );
       } catch {
         route = false;

@@ -6,20 +6,22 @@ function addPerson(g, map, number) {
 
   for (let i = 0; i < number; i++) {
     let finished = false;
-    let home, goal, route;
+    let home, goal, res_avoid, route, avoid;
 
     while (!finished) {
       home = desideNextGoal(map);
       goal = desideNextGoal(map);
       try {
-        route = g.dijkstra_shortest_path(
+        res_avoid = g.hide_node_dijkstra(
           pos_to_str(home[0], home[1]),
           pos_to_str(goal[0], goal[1])
         );
+        route = res_avoid.result;
+        avoid = res_avoid.avoid;
       } catch {
-        route = false;
+        res_avoid = false;
       }
-      if (route) {
+      if (res_avoid) {
         finished = true;
       }
     }
@@ -29,6 +31,7 @@ function addPerson(g, map, number) {
       to: goal,
       home: home,
       route,
+      avoid,
     };
   }
 
