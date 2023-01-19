@@ -7,7 +7,7 @@ const baseURL = 'http://localhost:8080';
 
 const xSize = 20;
 const ySize = 20;
-const PERSONS = 5;
+const PERSONS = 10;
 var stage, g, persons;
 var idMap = {};
 var finished = true;
