@@ -105,4 +105,3 @@ import { makeGraph, pos_to_str } from './dijkstra.js';
 
 var grid = map();
 const g = makeGraph(grid);
-console.log(g.dijkstra_shortest_path(pos_to_str(0, 0), pos_to_str(19, 19)));

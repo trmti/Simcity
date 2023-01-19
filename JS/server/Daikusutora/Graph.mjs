@@ -64,7 +64,6 @@ Graph.prototype.dijkstra_shortest_path = function (nameS, nameG) {
     let { data: n_name, priority: my_d } = p.dequeue(); //優先度付きキューから距離が最小の頂点を得る
     if (n_name == nameG) {
       //ゴールの距離が確定した時点で終了
-      console.log(cnt);
       break;
     }
     if (cnt > this.num()) {
@@ -97,50 +96,43 @@ Graph.prototype.dijkstra_shortest_path = function (nameS, nameG) {
   return result;
 };
 
+// function getRandomInt(min, max) {
+//   min = Math.ceil(min);
+//   max = Math.floor(max);
+//   return Math.floor(Math.random() * (max - min) + min);
+// }
+// Graph.prototype.hide_node_dijkstra = function () {
+//   let node_names = Object.keys(this.nodes);
+//   let remove_node = this.nodes[node_names[getRandomInt(0, node_names.length)]];
+//   const original_adjacent = remove_node.adjacent;
+// };
+
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min);
 }
-Graph.prototype.hide_node_dijkstra = function () {
+Graph.prototype.hide_node_dijkstra = function (nameS, nameG) {
   let node_names = Object.keys(this.nodes);
-  let remove_node = this.nodes[node_names[getRandomInt(0, node_names.length)]];
-  const original_adjacent = remove_node.adjacent;
+  while (true) {
+    var rm_node_name = node_names[getRandomInt(0, node_names.length)];
+    if (rm_node_name != nameS && rm_node_name != nameG) {
+      break;
+    }
+  }
+  console.log(rm_node_name + 'is hided.');
+  let remove_node = this.nodes[rm_node_name];
+  let original_adjacent = [];
+  for (let i = 0; i < remove_node.adjacent.length; i++) {
+    let buffer = remove_node.adjacent[i].concat();
+    original_adjacent.push(buffer);
+  }
+  for (let i = 0; i < remove_node.adjacent.length; i++) {
+    remove_node.adjacent[i][1] = Infinity;
+  }
+  let result = this.dijkstra_shortest_path(nameS, nameG);
+  for (let i = 0; i < original_adjacent.length; i++) {
+    remove_node.adjacent[i] = original_adjacent[i].concat();
+  }
+  return result;
 };
-
-// function getRandomInt(min, max)
-// {
-//     min = Math.ceil(min);
-//     max = Math.floor(max);
-//     return Math.floor(Math.random() * (max - min) + min);
-// }
-// Graph.prototype.hide_node_dijkstra = function(nameS, nameG)
-// {
-//     let node_names = Object.keys(this.nodes)
-//     while(true)
-//     {
-//         var rm_node_name = node_names[getRandomInt(0, node_names.length)]
-//         if(rm_node_name != nameS && rm_node_name != nameG)
-//         {
-//             break
-//         }
-//     }
-//     console.log(rm_node_name + "is hided.")
-//     let remove_node = this.nodes[rm_node_name]
-//     let original_adjacent = []
-//     for(let i = 0; i < remove_node.adjacent.length; i++)
-//     {
-//         let buffer = remove_node.adjacent[i].concat()
-//         original_adjacent.push(buffer)
-//     }
-//     for(let i = 0; i < remove_node.adjacent.length; i++)
-//     {
-//         remove_node.adjacent[i][1] = Infinity
-//     }
-//     let result = this.dijkstra_shortest_path(nameS, nameG)
-//     for(let i = 0; i < original_adjacent.length; i++)
-//     {
-//         remove_node.adjacent[i] = original_adjacent[i].concat()
-//     }
-//     return result
-// }

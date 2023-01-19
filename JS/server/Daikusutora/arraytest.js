@@ -1,9 +1,7 @@
-var a = []
+var a = [];
 
-a.push([3, 4])
+a.push([3, 4]);
 // a.push([5, 6])
 
-for(let i of a)
-{
-    console.log(i[1])
+for (let i of a) {
 }

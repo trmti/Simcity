@@ -1,10 +1,17 @@
 import kaboom from 'https://unpkg.com/kaboom/dist/kaboom.mjs';
-import persons from './persons.json' assert { 'type': 'json' };
+import addPerson from '../server/utils/addPerson.js';
+import { createMap } from '../server/utils/createMap.mjs';
+import { makeGraph } from '../server/Daikusutora/dijkstra.mjs';
 
 const baseURL = 'http://localhost:8080';
 
 const xSize = 20;
 const ySize = 20;
+const PERSONS = 5;
+var stage, g, persons;
+var idMap = {};
+var finished = true;
+var loading = false;
 
 kaboom({
   background: [255, 255, 255],
@@ -40,12 +47,6 @@ function addObj(src, index) {
     cleanup(),
   ];
 }
-
-function createNewText(text) {
-  return JSON.stringify(JSON.parse(text.split(': ')[1]));
-}
-
-var idMap = {};
 
 scene('game', ({ stage, persons }) => {
   gravity(0);
@@ -120,13 +121,32 @@ scene('game', ({ stage, persons }) => {
   });
 
   async function next() {
-    destroyAll('person');
-    const newPoses = await (await fetch(`${baseURL}/move`)).json();
-    const personalInfo = await (
-      await fetch(`${baseURL}/getPersonalInfo/${currentId}`)
-    ).json();
+    if (!finished) {
+      return;
+    }
+    finished = false;
+    const newPoses = await Promise.all(
+      Object.keys(persons).map(async (index) => {
+        const res = persons[index].route.shift();
+        if (persons[index].route.length === 0) {
+          loading = true;
+          const route = await (
+            await fetch(`${baseURL}/newGoal`, {
+              method: 'POST',
+              body: JSON.stringify(res),
+            })
+          ).json();
+          persons[index].route = route;
+          loading = false;
+        }
+
+        return res;
+      })
+    );
+    const personalInfo = persons[currentId];
     route.textContent = `route: ${JSON.stringify(personalInfo.route)}`;
 
+    destroyAll('person');
     newPoses.forEach((newPos, index) => {
       const obj = add([
         sprite('person'),
@@ -137,14 +157,14 @@ scene('game', ({ stage, persons }) => {
       ]);
       idMap[obj._id] = index;
     });
+
+    finished = true;
   }
 
   onHover('person', async (person) => {
     currentId = idMap[person._id];
-    const personInfo = await (
-      await fetch(`${baseURL}/getPersonalInfo/${currentId}`)
-    ).json();
-    player.textContent = `Player: ${idMap[person._id]}`;
+    const personInfo = persons[currentId];
+    player.textContent = `Player: ${currentId}`;
     home.textContent = `home: ${JSON.stringify(personInfo.home)}`;
     goTo.textContent = `goTo: ${JSON.stringify(personInfo.to)}`;
     route.textContent = `route: ${JSON.stringify(personInfo.route)}`;
@@ -161,8 +181,8 @@ scene('game', ({ stage, persons }) => {
     playing = !playing;
     if (playing) {
       btn.textContent = 'Stop';
-      intervalId = setInterval(() => {
-        next();
+      intervalId = setInterval(async () => {
+        await next();
       }, 1000);
     } else {
       btn.textContent = 'Start Auto Mode';
@@ -171,12 +191,14 @@ scene('game', ({ stage, persons }) => {
   });
 });
 async function start() {
-  const { stage, persons } = await (
-    await fetch('http://localhost:8080/createMap', {
-      mode: 'cors',
-    })
-  ).json();
-
+  stage = createMap(xSize, ySize);
+  g = makeGraph(stage);
+  await fetch('http://localhost:8080/createMap', {
+    mode: 'cors',
+    method: 'POST',
+    body: JSON.stringify(stage),
+  });
+  persons = addPerson(g, stage, PERSONS);
   go('game', {
     stage,
     persons,

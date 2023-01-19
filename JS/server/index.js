@@ -1,11 +1,9 @@
 import server from 'server';
-import { createMap } from './utils/createMap.mjs';
 import { makeGraph, pos_to_str } from './Daikusutora/dijkstra.mjs';
 import desideNextGoal from './utils/desideNextGoal.js';
-import addPerson from './utils/addPerson.js';
 import cors from 'cors';
 
-const { send, json, status } = server.reply;
+const { status } = server.reply;
 const { get, post, error } = server.router;
 
 const newCors = cors({
@@ -13,42 +11,36 @@ const newCors = cors({
 });
 const corsOption = server.utils.modern(newCors);
 
-const INITIAL_PERSON = 5;
-const SIZEX = 20;
-const SIZEY = 20;
-
-var map;
 var g;
-var persons = {};
+var map;
 
 // Launch server with options and a couple of routes
 server({ port: 8080, security: { csrf: false } }, corsOption, [
-  get('/createMap', (ctx) => {
-    map = createMap(SIZEX, SIZEY);
+  post('/createMap', (ctx) => {
+    console.log('created map!');
+    map = JSON.parse(ctx.data);
     g = makeGraph(map);
-    persons = addPerson(g, map, INITIAL_PERSON);
-    console.log('Created Map');
-    return status(200).send(JSON.stringify({ stage: map, persons }));
+    return status(200).send('Successfully created');
   }),
-  get('/move', (ctx) => {
-    let res = [];
-    Object.keys(persons).forEach((i) => {
-      const currentPos = persons[i].route.shift();
-      if (persons[i].route.length == 0) {
-        const nextGoal = desideNextGoal(map);
-        persons[i].route = g.dijkstra_shortest_path(
-          pos_to_str(currentPos[0], currentPos[1]),
-          pos_to_str(nextGoal[0], nextGoal[1])
+  post('/newGoal', (ctx) => {
+    const from = JSON.parse(ctx.data);
+    let finished = false;
+    let to, route;
+    while (!finished) {
+      to = desideNextGoal(map);
+      try {
+        route = g.dijkstra_shortest_path(
+          pos_to_str(from[1], from[0]),
+          pos_to_str(to[0], to[1])
         );
+      } catch {
+        route = false;
       }
-      res.push(currentPos);
-    });
-    return status(200).send(JSON.stringify(res));
-  }),
-  get('/getPersonalInfo/:id', (ctx) => {
-    const id = ctx.params.id;
-    const person = persons[`${id}`];
-    return status(200).send(JSON.stringify(person));
+      if (route) {
+        finished = true;
+      }
+    }
+    return status(200).send(JSON.stringify(route));
   }),
 
   error((ctx) => status(500).send(ctx.error.message)),

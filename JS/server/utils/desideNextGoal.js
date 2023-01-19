@@ -2,8 +2,8 @@ import { roads } from './objects.js';
 
 function checkAround(map, x, y) {
   const top = y !== 0 ? map[y - 1][x] : undefined;
-  const right = x !== map[0].length ? map[y][x + 1] : undefined;
-  const bottom = y !== map.length ? map[y + 1][x] : undefined;
+  const right = x !== map[0].length - 1 ? map[y][x + 1] : undefined;
+  const bottom = y !== map.length - 1 ? map[y + 1][x] : undefined;
   const left = x !== 0 ? map[x - 1][y] : undefined;
 
   if (top && right && bottom && left) {
@@ -34,8 +34,8 @@ function desideNextGoal(map) {
     pointY = Math.floor(Math.random() * ySize);
 
     if (
-      !roads.includes(map[pointY][pointX])
-      // checkAround(map, pointX, pointY)
+      !roads.includes(map[pointY][pointX]) &&
+      checkAround(map, pointX, pointY)
     ) {
       finished = true;
     }
