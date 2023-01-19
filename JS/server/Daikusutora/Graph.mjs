@@ -42,6 +42,7 @@ Graph.prototype.connect_node = function (
   nameB,
   cost //頂点どうしを接続
 ) {
+  console.log(nameA, nameB);
   this.nodes[nameA].connect(nameB, cost);
   this.nodes[nameB].connect(nameA, cost);
 };
@@ -64,6 +65,7 @@ Graph.prototype.dijkstra_shortest_path = function (nameS, nameG) {
     let { data: n_name, priority: my_d } = p.dequeue(); //優先度付きキューから距離が最小の頂点を得る
     if (n_name == nameG) {
       //ゴールの距離が確定した時点で終了
+      console.log(cnt);
       break;
     }
     if (cnt > this.num()) {
@@ -96,17 +98,6 @@ Graph.prototype.dijkstra_shortest_path = function (nameS, nameG) {
   return result;
 };
 
-// function getRandomInt(min, max) {
-//   min = Math.ceil(min);
-//   max = Math.floor(max);
-//   return Math.floor(Math.random() * (max - min) + min);
-// }
-// Graph.prototype.hide_node_dijkstra = function () {
-//   let node_names = Object.keys(this.nodes);
-//   let remove_node = this.nodes[node_names[getRandomInt(0, node_names.length)]];
-//   const original_adjacent = remove_node.adjacent;
-// };
-
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -134,5 +125,5 @@ Graph.prototype.hide_node_dijkstra = function (nameS, nameG) {
   for (let i = 0; i < original_adjacent.length; i++) {
     remove_node.adjacent[i] = original_adjacent[i].concat();
   }
-  return { result, avoid: str_to_pos(rm_node_name) };
+  return result;
 };
