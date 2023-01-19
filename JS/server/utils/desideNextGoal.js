@@ -44,4 +44,26 @@ function desideNextGoal(map) {
   return [pointX, pointY];
 }
 
+export function newGoal(map, from) {
+  let finished = false;
+  let to, route;
+  while (!finished) {
+    console.log('new');
+    to = desideNextGoal(map);
+    try {
+      route = g.dijkstra_shortest_path(
+        pos_to_str(from[0], from[1]),
+        pos_to_str(to[1], to[0])
+      );
+    } catch {
+      route = false;
+    }
+    if (route) {
+      finished = true;
+    }
+  }
+
+  return route;
+}
+
 export default desideNextGoal;

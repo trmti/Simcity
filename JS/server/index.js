@@ -30,8 +30,8 @@ server({ port: 8080, security: { csrf: false } }, corsOption, [
       to = desideNextGoal(map);
       try {
         route = g.dijkstra_shortest_path(
-          pos_to_str(from[1], from[0]),
-          pos_to_str(to[0], to[1])
+          pos_to_str(from[0], from[1]),
+          pos_to_str(to[1], to[0])
         );
       } catch {
         route = false;
