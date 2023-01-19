@@ -92,10 +92,7 @@ int main()
     int a = 0;
     for(Vertex v = V[goal.x][goal.y]; v != V[start.x][start.y]; v = parent[v])
     {
-        // if(a > 10){return 1;}
         route.push_front(v);
-        // cout << G[v].name << endl;
-        // ++a;
     }
     route.push_front(V[start.x][start.y]);
 
