@@ -134,5 +134,5 @@ Graph.prototype.hide_node_dijkstra = function (nameS, nameG) {
   for (let i = 0; i < original_adjacent.length; i++) {
     remove_node.adjacent[i] = original_adjacent[i].concat();
   }
-  return result;
+  return { result, avoid: str_to_pos(rm_node_name) };
 };

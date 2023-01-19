@@ -2,16 +2,15 @@ import kaboom from 'https://unpkg.com/kaboom/dist/kaboom.mjs';
 import addPerson from '../server/utils/addPerson.js';
 import { createMap } from '../server/utils/createMap.mjs';
 import { makeGraph } from '../server/Daikusutora/dijkstra.mjs';
-
+import { newGoal } from '../server/utils/desideNextGoal.js';
 const baseURL = 'http://localhost:8080';
 
-const xSize = 20;
-const ySize = 20;
-const PERSONS = 5;
+const xSize = 10;
+const ySize = 10;
+const PERSONS = 1;
 var stage, g, persons;
 var idMap = {};
 var finished = true;
-var loading = false;
 
 kaboom({
   background: [255, 255, 255],
@@ -23,6 +22,7 @@ kaboom({
 loadSprite('home1', '/images/buildings/house_red.png');
 loadSprite('home2', '/images/buildings/house_blue.png');
 loadSprite('home3', '/images/buildings/building.png');
+loadSprite('hilight', '/images/flame.png');
 
 loadSprite('person', '/images/peaple.png');
 
@@ -54,6 +54,9 @@ scene('game', ({ stage, persons }) => {
   const home = document.getElementById('home');
   const goTo = document.getElementById('goTo');
   const route = document.getElementById('route');
+  const layer = document.getElementById('fadeLayer');
+  const icon = document.getElementById('loadingIcon');
+
   let currentId = 0;
 
   stage.map((y, yIndex) => {
@@ -116,6 +119,15 @@ scene('game', ({ stage, persons }) => {
       cleanup(),
       'person',
     ]);
+    persons[index].route.forEach((road) => {
+      add([
+        sprite('hilight'),
+        pos(road[1] * 50 + 50, road[0] * 50 + 50),
+        area(),
+        cleanup(),
+        'hilight',
+      ]);
+    });
 
     idMap[obj._id] = index;
   });
@@ -129,15 +141,31 @@ scene('game', ({ stage, persons }) => {
       Object.keys(persons).map(async (index) => {
         const res = persons[index].route.shift();
         if (persons[index].route.length === 0) {
-          loading = true;
+          layer.style.visibility = 'visible';
+          icon.style.visibility = 'visible';
           const route = await (
             await fetch(`${baseURL}/newGoal`, {
               method: 'POST',
               body: JSON.stringify(res),
             })
           ).json();
+
+          console.log(index, currentId);
+          if (index == currentId) {
+            destroyAll('hilight');
+            route.forEach((road) => {
+              add([
+                sprite('hilight'),
+                pos(road[1] * 50 + 50, road[0] * 50 + 50),
+                area(),
+                cleanup(),
+                'hilight',
+              ]);
+            });
+          }
           persons[index].route = route;
-          loading = false;
+          layer.style.visibility = 'hidden';
+          icon.style.visibility = 'hidden';
         }
 
         return res;
@@ -183,7 +211,7 @@ scene('game', ({ stage, persons }) => {
       btn.textContent = 'Stop';
       intervalId = setInterval(async () => {
         await next();
-      }, 1000);
+      }, 500);
     } else {
       btn.textContent = 'Start Auto Mode';
       clearInterval(intervalId);
