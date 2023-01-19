@@ -16,20 +16,20 @@ export function makeGraph(grid) {
     for (let j = 0; j < grid[i].length; j++) {
       if (grid[i][j] < 100) {
         if (i != 0 && grid[i - 1][j] < 100) {
-          g.connect_node(pos_to_str(j, i), pos_to_str(j - 1, i), 1);
+          g.connect_node(pos_to_str(i, j), pos_to_str(i - 1, j), 1);
         }
         if (j != 0 && grid[i][j - 1] < 100) {
-          g.connect_node(pos_to_str(j, i), pos_to_str(j, i - 1), 1);
+          g.connect_node(pos_to_str(i, j), pos_to_str(i, j - 1), 1);
         }
       } else {
         if (i != 0 && grid[i - 1][j] < 100) {
-          g.connect_node(pos_to_str(j, i), pos_to_str(j - 1, i), 1000);
+          g.connect_node(pos_to_str(i, j), pos_to_str(i - 1, j), 1000);
         } else if (j != 0 && grid[i][j - 1] < 100) {
-          g.connect_node(pos_to_str(j, i), pos_to_str(j, i - 1), 1000);
+          g.connect_node(pos_to_str(i, j), pos_to_str(i, j - 1), 1000);
         } else if (i < grid.length - 1 && grid[i + 1][j] < 100) {
-          g.connect_node(pos_to_str(j, i), pos_to_str(j + 1, i), 1000);
+          g.connect_node(pos_to_str(i, j), pos_to_str(i + 1, j), 1000);
         } else if (j < grid[i].length - 1 && grid[i][j + 1] < 100) {
-          g.connect_node(pos_to_str(j, i), pos_to_str(j, i + 1), 1000);
+          g.connect_node(pos_to_str(i, j), pos_to_str(i, j + 1), 1000);
         }
       }
     }
