@@ -1,11 +1,7 @@
 import kaboom from 'https://unpkg.com/kaboom/dist/kaboom.mjs';
-
-import { createMap } from './utils/createMap.js';
-
 import persons from './persons.json' assert { 'type': 'json' };
 
 const baseURL = 'http://localhost:8080';
-const moves = [0, 1];
 
 const xSize = 20;
 const ySize = 20;
@@ -45,12 +41,19 @@ function addObj(src, index) {
   ];
 }
 
+function createNewText(text) {
+  return JSON.stringify(JSON.parse(text.split(': ')[1]));
+}
+
+var idMap = {};
+
 scene('game', ({ stage, persons }) => {
   gravity(0);
-  // window.addEventListener('scroll', (event) => {
-  //   console.log('scroll', window.scrollX, window.scrollY);
-  //   camPos(window.scrollX, window.scrollY);
-  // });
+  const player = document.getElementById('player');
+  const home = document.getElementById('home');
+  const goTo = document.getElementById('goTo');
+  const route = document.getElementById('route');
+  let currentId = 0;
 
   stage.map((y, yIndex) => {
     y.map((x, xIndex) => {
@@ -104,41 +107,75 @@ scene('game', ({ stage, persons }) => {
     });
   });
 
-  persons.map((person) => {
-    add([
+  Object.keys(persons).map((index) => {
+    const obj = add([
       sprite('person'),
-      pos(person.pos[0] * 50 + 50, person.pos[1] * 50 + 50),
+      pos(persons[index].pos[1] * 50 + 50, persons[index].pos[0] * 50 + 50),
       area(),
       cleanup(),
       'person',
     ]);
+
+    idMap[obj._id] = index;
   });
 
-  onKeyPress('space', () => {
-    const personObjs = get('person');
-    moves.forEach((move, index) => {
-      let direction;
-      switch (move) {
-        case 0:
-          direction = [0, -3000];
-          break;
-        case 1:
-          direction = [3000, 0];
-          break;
-        case 2:
-          direction = [0, 3000];
-          break;
-        case 3:
-          direction = [-3000, 0];
-          break;
-      }
-      personObjs[index].move(direction[0], direction[1]);
+  async function next() {
+    destroyAll('person');
+    const newPoses = await (await fetch(`${baseURL}/move`)).json();
+    const personalInfo = await (
+      await fetch(`${baseURL}/getPersonalInfo/${currentId}`)
+    ).json();
+    route.textContent = `route: ${JSON.stringify(personalInfo.route)}`;
+
+    newPoses.forEach((newPos, index) => {
+      const obj = add([
+        sprite('person'),
+        pos(newPos[1] * 50 + 50, newPos[0] * 50 + 50),
+        area(),
+        cleanup(),
+        'person',
+      ]);
+      idMap[obj._id] = index;
     });
+  }
+
+  onHover('person', async (person) => {
+    currentId = idMap[person._id];
+    const personInfo = await (
+      await fetch(`${baseURL}/getPersonalInfo/${currentId}`)
+    ).json();
+    player.textContent = `Player: ${idMap[person._id]}`;
+    home.textContent = `home: ${JSON.stringify(personInfo.home)}`;
+    goTo.textContent = `goTo: ${JSON.stringify(personInfo.to)}`;
+    route.textContent = `route: ${JSON.stringify(personInfo.route)}`;
+  });
+
+  onKeyPress('space', async () => {
+    await next();
+  });
+
+  const btn = document.getElementById('auto');
+  let playing = false;
+  let intervalId;
+  btn.addEventListener('click', () => {
+    playing = !playing;
+    if (playing) {
+      btn.textContent = 'Stop';
+      intervalId = setInterval(() => {
+        next();
+      }, 1000);
+    } else {
+      btn.textContent = 'Start Auto Mode';
+      clearInterval(intervalId);
+    }
   });
 });
-
 async function start() {
-  const stage = createMap(xSize, ySize);
+  const { stage, persons } = await (
+    await fetch('http://localhost:8080/createMap', {
+      mode: 'cors',
+    })
+  ).json();
 
   go('game', {
     stage,

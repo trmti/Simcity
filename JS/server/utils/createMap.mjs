@@ -128,7 +128,7 @@ export function createMap(xSize, ySize) {
     Array.from(Array(ySize)).map(() => -1)
   );
 
-  const count = Math.floor((xSize * ySize) / 2);
+  const count = Math.floor(xSize * ySize * 2);
 
   for (let i = 0; i < count; i++) {
     const point = [
@@ -182,5 +182,4 @@ export function createMap(xSize, ySize) {
   });
 
   return formMap(map);
-  // return map;
 }
