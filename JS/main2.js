@@ -58,7 +58,6 @@ async function start(xSize, ySize, PERSONS) {
     const route = document.getElementById('route');
 
     let currentId = 0;
-    let avoid = [0, 0];
 
     stage.map((y, yIndex) => {
       y.map((x, xIndex) => {
@@ -149,7 +148,7 @@ async function start(xSize, ySize, PERSONS) {
               })
             ).json();
             const route = res_avoid.route;
-            avoid = res_avoid.avoid;
+            const avoid = res_avoid.avoid;
             persons[index].home = res;
             persons[index].to = route[route.length - 1];
 
@@ -207,25 +206,6 @@ async function start(xSize, ySize, PERSONS) {
 
       destroyAll('person');
       newPoses.forEach((newPos, index) => {
-        if (
-          index == currentId &&
-          newPos[1] == avoid[1] &&
-          newPos[0] == avoid[0]
-        ) {
-          setTimeout(async () => {
-            const unko = document.getElementById('unko');
-            const body = document.querySelector('body');
-            unko.style.visibility = 'visible';
-            body.classList.add('shivering');
-            await new Promise((resolve, reject) =>
-              setTimeout(() => {
-                resolve();
-              }, 1000)
-            );
-            unko.style.visibility = 'hidden';
-            body.classList.remove('shivering');
-          }, 0);
-        }
         const obj = add([
           sprite('person'),
           pos(newPos[1] * 50 + 50, newPos[0] * 50 + 50),
@@ -282,9 +262,9 @@ async function start(xSize, ySize, PERSONS) {
 }
 
 async function main() {
-  let xSize = 10;
-  let ySize = 10;
-  let PERSONS = 1;
+  let xSize = 20;
+  let ySize = 20;
+  let PERSONS = 3;
   await start(xSize, ySize, PERSONS);
 }
 
